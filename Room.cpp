@@ -1,117 +1,118 @@
 ﻿#include "Room.hpp"
-
 #include <iostream>
 
-bool Room::validateRoomData(int number, double price) const {
+// Вспомогательный приватный метод для валидации данных
+bool Room::validateRoomData(int number, double pricePerNight) const {
     if (number <= 0) {
-        std::cout << " !!! Номер комнаты должен быть > 0. " << "Получено: " << number << std::endl;
+        std::cout << " !!! Номер комнаты должен быть > 0. Получено: " << number << std::endl;
         return false;
     }
-    if (price <= 0.0) {
-        std::cout << " !!! Цена за ночь должна быть > 0. " << "Получено: " << price << std::endl;
+    if (pricePerNight <= 0.0) {
+        std::cout << " !!! Цена за ночь должна быть > 0. Получено: " << pricePerNight << std::endl;
         return false;
     }
     return true;
 }
 
 // Конструктор по умолчанию
-Room::Room(): 
-    number_(0), 
-    price_per_night_(0.0),
-    status_("Свободен"), 
-    current_guest_(nullptr) {}
+Room::Room()
+    : m_number(0),
+    m_pricePerNight(0.0),
+    m_status("Свободен"),
+    m_currentGuest() {}
 
 // Конструктор с параметрами
-Room::Room(int number, double price_per_night): 
-    number_(number), 
-    price_per_night_(price_per_night), 
-    status_("Свободен"), 
-    current_guest_(nullptr) {
+Room::Room(int number, double pricePerNight)
+    : m_number(number),
+    m_pricePerNight(pricePerNight),
+    m_status("Свободен"),
+    m_currentGuest() {
 
-    // Проверка правила:
-    // Номер комнаты больше 0, цена больше 0».
-    if (!validateRoomData(number, price_per_night)) {
-        std::cout << " !!! Номер создан с некорректными данными. " << "Установлены значения по умолчанию." << std::endl;
-        number_ = 0;
-        price_per_night_ = 0.0;
+    // Проверка правила предметной области
+    if (!validateRoomData(number, pricePerNight)) {
+        std::cout << " !!! Номер создан с некорректными данными. Установлены значения по умолчанию." << std::endl;
+        m_number = 0;
+        m_pricePerNight = 0.0;
     }
-}
-
-Room::~Room() {
-    std::cout << "~Room() уничтожен: номер " << number_ << std::endl;
 }
 
 // Содержательный метод 1: Заселение гостя
-void Room::checkIn(Guest* guest) {
-    // Проверка правила:
-    // Нельзя заселить гостя в номер, который уже занят.
-    if (guest == nullptr) {
-        std::cout << " !!! Попытка заселить несуществующего гостя " << "в номер " << number_ << "." << std::endl;
+void Room::checkIn(std::shared_ptr<Guest> guest) {
+    // 1. проверка входящего параметра
+    if (!guest) {
+        std::cout << " !!! Попытка заселить несуществующего гостя в номер " << m_number << "." << std::endl;
         return;
     }
 
-    if (current_guest_ != nullptr) {
-        std::cout << " !!! Номер " << number_ << " уже занят гостем " << current_guest_->getName() << ". Заселение отклонено." << std::endl;
+    // 2. Проверка, не занят ли номер
+    if (!m_currentGuest.expired()) {//проверка на существование
+        if (auto lockedGuest = m_currentGuest.lock()) {//жив ли гость (да, возврат shared)
+            std::cout << " !!! Номер " << m_number << " уже занят гостем " << lockedGuest->getName()  << ". Заселение отклонено." << std::endl;
+        }
         return;
     }
 
-    if (status_ != "Свободен") {
-        std::cout << " !!! Номер " << number_ << " не готов к заселению (статус: \"" << status_ << "\")." << std::endl;
+    // 3. Проверка статуса номера (жизненный цикл)
+    if (m_status != "Свободен") {
+        std::cout << " !!! Номер " << m_number << " не готов к заселению (статус: \"" << m_status << "\")." << std::endl;
         return;
     }
 
-    // Всё в порядке — заселение
-    current_guest_ = guest;  // Агрегация: сохранение указателя
-    status_ = "Занят";       // Смена состояня (жизненный цикл)
-    std::cout << " Гость " << guest->getName() << " заселён в номер " << number_ << "." << std::endl;
+    m_currentGuest = guest;  // Агрегация: сохранение указателя
+    m_status = "Занят";      // Смена состояния
+    std::cout << " Гость " << guest->getName() << " заселён в номер " << m_number << "." << std::endl;
 }
 
 // Содержательный метод 2: Выселение гостя
 void Room::checkOut() {
+    auto lockedGuest = m_currentGuest.lock();
     // Проверка: в номере должен кто-то жить
-    if (current_guest_ == nullptr) {
-        std::cout << " !!! Номер " << number_ << " уже пуст. Нет человека для выселения." << std::endl;
+    if (!lockedGuest) {
+        std::cout << " !!! Номер " << m_number << " уже пуст. Нет человека для выселения." << std::endl;
         return;
     }
 
-    std::string guest_name = current_guest_->getName();
+    // Сохранение имени в локальную переменную перед обрывом связи
+    std::string guestName = lockedGuest->getName();
 
-    current_guest_ = nullptr;
+    m_currentGuest.reset();
 
-    // Жизненный цикл: после выезда номер переходит
-    // в состояние "Требуется уборка", а не "Свободен"
-    status_ = "Требуется уборка";
+    // Жизненный цикл: после выезда номер переходит в состояние "Требуется уборка"
+    m_status = "Требуется уборка";
 
-    std::cout << " Гость " << guest_name << " выехал из номера " << number_ << ". Номер требует уборки." << std::endl;
+    std::cout << " Гость " << guestName << " выехал из номера " << m_number << ". Номер требует уборки." << std::endl;
 }
 
 // Содержательный метод 3: Вывод информации
 void Room::printInfo() const {
-    std::cout << "  Номер: " << number_ << " | Цена: " << price_per_night_ << " руб./ночь"  << " | Статус: " << status_;
+    std::cout << "  Номер: " << m_number
+        << " | Цена: " << m_pricePerNight << " руб./ночь"
+        << " | Статус: " << m_status;
 
-    if (current_guest_ != nullptr) {
-        std::cout << " | Гость: " << current_guest_->getName();
+    if (auto lockedGuest = m_currentGuest.lock()) {
+        std::cout << " | Гость: " << lockedGuest->getName();
     }
     std::cout << std::endl;
 }
 
-// ─── Содержательный метод 4: Проверка доступности ───
+// Содержательный метод 4: Проверка доступности
 bool Room::isAvailable() const {
-    return (status_ == "Свободен" && current_guest_ == nullptr);
+    return (m_status == "Свободен" && m_currentGuest.expired());
 }
 
+// Геттеры
 int Room::getNumber() const {
-    return number_;
+    return m_number;
 }
 
 double Room::getPricePerNight() const {
-    return price_per_night_;
+    return m_pricePerNight;
 }
 
 std::string Room::getStatus() const {
-    return status_;
+    return m_status;
 }
 
-Guest* Room::getCurrentGuest() const {
-    return current_guest_;
+std::weak_ptr<Guest> Room::getCurrentGuest() const {
+    return m_currentGuest;
 }

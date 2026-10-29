@@ -1,78 +1,74 @@
 ﻿#include "Guest.hpp"
-
 #include <iostream>
 
 // Начальная ёмкость динамического массива.
 const int INITIAL_CAPACITY = 5;
 
 // Вспомогательный приватный метод
-bool Guest::validateData(const std::string& name,
-    const std::string& passport) const {
+bool Guest::validateData(const std::string& name, const std::string& passport) const {
     if (name.empty()) {
         std::cout << " !!! Имя гостя не может быть пустым!" << std::endl;
         return false;
     }
     if (passport.empty()) {
-        std::cout << " !!! Номер паспорта не может быть пустым!"<< std::endl;
+        std::cout << " !!! Номер паспорта не может быть пустым!" << std::endl;
         return false;
     }
     return true;
 }
 
-// Увеличение ёмкости массива
-void Guest::resizeArray() {
-    int new_capacity = services_capacity_ * 2;
-    std::string* new_array = new std::string[new_capacity];
-
-    for (int i = 0; i < services_count_; ++i) {
-        new_array[i] = requested_services_[i];
-    }
-
-    delete[] requested_services_;
-
-    requested_services_ = new_array;
-    services_capacity_ = new_capacity;
-
-    std::cout << " Массив услуг расширен до " << services_capacity_ << " элементов." << std::endl;
-}
-
 // Конструктор по умолчанию
-Guest::Guest(): name_("Неизвестный"),
-    passport_("0000 000000"),
-    requested_services_(new std::string[INITIAL_CAPACITY]),
-    services_count_(0),
-    services_capacity_(INITIAL_CAPACITY) {}
+Guest::Guest()
+    : m_name("Неизвестный"),
+    m_passport("0000 000000"),
+    m_requestedServices(std::make_unique<std::string[]>(INITIAL_CAPACITY)),
+    m_servicesCount(0),
+    m_servicesCapacity(INITIAL_CAPACITY) 
+{}
 
 // Конструктор с параметрами
 Guest::Guest(const std::string& name, const std::string& passport)
-    : name_(name),
-    passport_(passport),
-    requested_services_(new std::string[INITIAL_CAPACITY]),
-    services_count_(0),
-    services_capacity_(INITIAL_CAPACITY) {
+    : m_name(name),
+      m_passport(passport),
+      m_requestedServices(std::make_unique<std::string[]>(INITIAL_CAPACITY)),
+      m_servicesCount(0),
+      m_servicesCapacity(INITIAL_CAPACITY) {
+
     // Проверка правила предметной области
     if (!validateData(name, passport)) {
-        std::cout << " !!! Гость создан с некорректными данными. " << "Установлены значения по умолчанию." << std::endl;
-        name_ = "Неизвестный";
-        passport_ = "0000 000000";
+        std::cout << " !!! Гость создан с некорректными данными.  "
+            << "Установлены значения по умолчанию. " << std::endl;
+        m_name = "Неизвестный";
+        m_passport = "0000 000000";
     }
 }
 
-Guest::~Guest() {
-    delete[] requested_services_;
+// Увеличение ёмкости массива
+void Guest::resizeArray() {
+    int newCapacity = m_servicesCapacity * 2;
+    auto newArray = std::make_unique<std::string[]>(newCapacity);
 
-    std::cout << "~Guest() уничтожен: " << name_ << " (паспорт: " << passport_ << ")" << std::endl;
+    for (int i = 0; i < m_servicesCount; ++i) {
+        newArray[i] = m_requestedServices[i];
+    }
+
+    m_requestedServices = std::move(newArray);
+    m_servicesCapacity = newCapacity;
+
+    std::cout << " Массив услуг расширен до " << m_servicesCapacity << " элементов." << std::endl;
 }
 
 // Копирующий конструктор
 Guest::Guest(const Guest& other)
-    : name_(other.name_),
-    passport_(other.passport_),
-    requested_services_(new std::string[other.services_capacity_]),
-    services_count_(other.services_count_),
-    services_capacity_(other.services_capacity_) {
-    for (int i = 0; i < services_count_; ++i) {
-        requested_services_[i] = other.requested_services_[i];
+    : m_name(other.m_name),
+    m_passport(other.m_passport),
+    m_servicesCount(other.m_servicesCount),
+    m_servicesCapacity(other.m_servicesCapacity),
+
+    m_requestedServices(std::make_unique<std::string[]>(m_servicesCapacity))
+{
+    for (int i = 0; i < m_servicesCount; ++i) {
+        m_requestedServices[i] = other.m_requestedServices[i];
     }
 }
 
@@ -81,15 +77,15 @@ Guest& Guest::operator=(const Guest& other) {
     if (this == &other) {
         return *this;
     }
-    delete[] requested_services_;
-    name_ = other.name_;
-    passport_ = other.passport_;
-    services_count_ = other.services_count_;
-    services_capacity_ = other.services_capacity_;
-    requested_services_ = new std::string[services_capacity_];
 
-    for (int i = 0; i < services_count_; ++i) {
-        requested_services_[i] = other.requested_services_[i];
+    m_name = other.m_name;
+    m_passport = other.m_passport;
+    m_servicesCount = other.m_servicesCount;
+    m_servicesCapacity = other.m_servicesCapacity;
+    m_requestedServices = std::make_unique<std::string[]>(m_servicesCapacity);
+
+    for (int i = 0; i < m_servicesCount; ++i) {
+        m_requestedServices[i] = other.m_requestedServices[i];
     }
 
     return *this;
@@ -97,18 +93,18 @@ Guest& Guest::operator=(const Guest& other) {
 
 // Содержательный метод 1: вывод информации
 void Guest::printInfo() const {
-    std::cout << "=== Информация о госте ===" << std::endl;
-    std::cout << "  ФИО:     " << name_ << std::endl;
-    std::cout << "  Паспорт: " << passport_ << std::endl;
+    std::cout << "=== Информация о госте === " << std::endl;
+    std::cout << "  ФИО:      " << m_name << std::endl;
+    std::cout << "  Паспорт:  " << m_passport << std::endl;
 
-    if (services_count_ == 0) {
+    if (m_servicesCount == 0) {
         std::cout << "  Услуги:  нет" << std::endl;
     }
     else {
         std::cout << "  Услуги:  ";
-        for (int i = 0; i < services_count_; ++i) {
-            std::cout << requested_services_[i];
-            if (i < services_count_ - 1) {
+        for (int i = 0; i < m_servicesCount; ++i) {
+            std::cout << m_requestedServices[i];
+            if (i < m_servicesCount - 1) {
                 std::cout << ", ";
             }
         }
@@ -118,69 +114,69 @@ void Guest::printInfo() const {
 }
 
 // Содержательный метод 2: запрос услуги
-void Guest::requestService(const std::string& service_name) {
+void Guest::requestService(const std::string& serviceName) {
     // Проверка: название не пустое
-    if (service_name.empty()) {
-        std::cout << " !!! Название услуги не может быть пустым."
-            << std::endl;
+    if (serviceName.empty()) {
+        std::cout << " !!! Название услуги не может быть пустым." << std::endl;
         return;
     }
 
     // Проверка: нет дубликатов
-    for (int i = 0; i < services_count_; ++i) {
-        if (requested_services_[i] == service_name) {
-            std::cout << " !!! Услуга \"" << service_name << "\" уже запрошена гостем " << name_ << "."<< std::endl;
+    for (int i = 0; i < m_servicesCount; ++i) {
+        if (m_requestedServices[i] == serviceName) {
+            std::cout << " !!! Услуга \"" << serviceName << "\" уже запрошена гостем " << m_name << "." << std::endl;
             return;
         }
     }
 
     // Если массив заполнен — расширение
-    if (services_count_ >= services_capacity_) {
+    if (m_servicesCount >= m_servicesCapacity) {
         resizeArray();
     }
 
-    requested_services_[services_count_] = service_name;
-    ++services_count_;
+    m_requestedServices[m_servicesCount] = serviceName;
+    ++m_servicesCount;
 
-    std::cout << "  Гость " << name_ << " запросил услугу \"" << service_name << "\"." << std::endl;
+    std::cout << "  Гость " << m_name << " запросил услугу \"" << serviceName << "\"." << std::endl;
 }
 
 // Содержательный метод 3: отмена услуги
-void Guest::cancelService(const std::string& service_name) {
+void Guest::cancelService(const std::string& serviceName) {
     // Поиск услуги в массиве
-    int found_index = -1;
-    for (int i = 0; i < services_count_; ++i) {
-        if (requested_services_[i] == service_name) {
-            found_index = i;
+    int foundIndex = -1;
+    for (int i = 0; i < m_servicesCount; ++i) {
+        if (m_requestedServices[i] == serviceName) {
+            foundIndex = i;
             break;
         }
     }
 
     // Проверка: услуга должна существовать
-    if (found_index == -1) {
-        std::cout << " !!! Услуга \"" << service_name << "\" не найдена в списке гостя " << name_ << "." << std::endl;
+    if (foundIndex == -1) {
+        std::cout << " !!! Услуга \"" << serviceName << "\" не найдена в списке гостя " << m_name << "." << std::endl;
         return;
     }
 
     // Сдвиг элементов после найденного на одну влево
-    for (int i = found_index; i < services_count_ - 1; ++i) {
-        requested_services_[i] = requested_services_[i + 1];
+    for (int i = foundIndex; i < m_servicesCount - 1; ++i) {
+        m_requestedServices[i] = m_requestedServices[i + 1];
     }
-    --services_count_;
-    requested_services_[services_count_] = "";
 
-    std::cout << " Гость " << name_ << " отменил услугу \"" << service_name << "\"." << std::endl;
+    --m_servicesCount;
+    m_requestedServices[m_servicesCount] = "";
+
+    std::cout << " Гость " << m_name << " отменил услугу \"" << serviceName << "\"." << std::endl;
 }
 
-// ─── Геттеры ───
+// Геттеры
 std::string Guest::getName() const {
-    return name_;
+    return m_name;
 }
 
 std::string Guest::getPassport() const {
-    return passport_;
+    return m_passport;
 }
 
 int Guest::getServicesCount() const {
-    return services_count_;
+    return m_servicesCount;
 }

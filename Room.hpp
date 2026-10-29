@@ -1,39 +1,35 @@
 ﻿#pragma once
-
 #include <string>
+#include <memory>
 #include "Guest.hpp"
 
 class Room {
 private:
-    int number_;                    // Номер комнаты
-    double price_per_night_;        // Стоимость за ночь
-    std::string status_;            // "Свободен" | "Занят" | "Требуется уборка"
-    Guest* current_guest_;          // АГРЕГАЦИЯ: указатель на гостя.
+    int m_number;                    // Номер комнаты
+    double m_pricePerNight;          // Стоимость за ночь
+    std::string m_status;            // "Свободен" | "Занят" | "Требуется уборка"
+    std::weak_ptr<Guest> m_currentGuest;  // АГРЕГАЦИЯ: указатель на гостя.
     // Room не создаёт и не удаляет гостя.
 
-    bool validateRoomData(int number, double price) const;
+    bool validateRoomData(int number, double pricePerNight) const;
 
 public:
     // Конструктор по умолчанию (нужен для new Room[2] в Hotel)
     Room();
 
     // Конструктор с параметрами
-    Room(int number, double price_per_night);
-
-    // Деструктор
-    ~Room();
+    Room(int number, double pricePerNight);
 
     // Содержательные методы
-    void checkIn(Guest* guest);// Заселение гостя (Агрегация: гость передаётся по указателю извне)
-    void checkOut();// Выселение гостя
-    void printInfo() const;// Вывод информации о номере
+    void checkIn(std::shared_ptr<Guest> guest);      // Заселение гостя (Агрегация)
+    void checkOut();                 // Выселение гостя
+    void printInfo() const;          // Вывод информации о номере
 
-    
-    [[nodiscard]] bool isAvailable() const;// Проверка, свободен ли номер для заселения
+    [[nodiscard]] bool isAvailable() const; // Проверка, свободен ли номер
 
-    //Геттеры
+    // Геттеры Room
     [[nodiscard]] int getNumber() const;
     [[nodiscard]] double getPricePerNight() const;
     [[nodiscard]] std::string getStatus() const;
-    [[nodiscard]] Guest* getCurrentGuest() const;
+    [[nodiscard]] std::weak_ptr<Guest> getCurrentGuest() const;
 };
