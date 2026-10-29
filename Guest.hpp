@@ -1,35 +1,33 @@
 ﻿#pragma once
 #include <string>
+#include <memory>
 
 class Guest {
 private:
-    std::string name_;
-    std::string passport_;
-
-    std::string* requested_services_;  // Указатель на массив строк
-    int services_count_;               // Сколько услуг сейчас в массиве
-    int services_capacity_;            // На сколько элементов выделена память
+    std::string m_name;
+    std::string m_passport;
+    std::unique_ptr<std::string[]> m_requestedServices;
+    int m_servicesCount;               // Сколько услуг сейчас в массиве
+    int m_servicesCapacity;            // На сколько элементов выделена память
 
     bool validateData(const std::string& name, const std::string& passport) const;
-    void resizeArray();  // Увеличивание ёмкость массива в 2 раза
+    void resizeArray();  // Увеличение ёмкости массива в 2 раза
 
 public:
     // Конструкторы
     Guest();
     Guest(const std::string& name, const std::string& passport);
-
-    // Деструктор
-    ~Guest();
-
+    
+    // Правило трёх
     Guest(const Guest& other);
     Guest& operator=(const Guest& other);
 
     // Содержательные методы
     void printInfo() const;
-    void requestService(const std::string& service_name);
-    void cancelService(const std::string& service_name);
+    void requestService(const std::string& serviceName);
+    void cancelService(const std::string& serviceName);
 
-    // Геттеры
+    // Геттеры Guest
     [[nodiscard]] std::string getName() const;
     [[nodiscard]] std::string getPassport() const;
     [[nodiscard]] int getServicesCount() const;

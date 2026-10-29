@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <string>
+#include <memory>
 
 #include "Guest.hpp"
 #include "Room.hpp"
@@ -13,67 +14,70 @@ int main() {
     Guest& refGuest = staticGuest;
     refGuest.printInfo();
 
-    std::cout << "\n=== 2. Динамическая инициализация и работа по указателю ===\n";
-    Guest* dynGuest = new Guest("Петр Петров", "9876 543210");
+    std::cout << "\n=== 2. unique_ptr Динамический объект ===\n";
+    auto dynGuest = std::make_unique<Guest>("Петр Петров", "9876 543210");//выделение памяти
     dynGuest->printInfo();
 
-    std::cout << "\n=== 3. Массивы объектов ===\n";
-    // 1) Динамический массив объектов (вызывается конструктор по умолчанию)
-    Room* roomsArray = new Room[2];
+    std::cout << "\n=== 3. unique_ptr Передача владения через std::move ===\n";
+    auto guestForMove = std::make_unique<Guest>("Временный гость", "5555 555555");
+    std::cout << "guestForMove до move: " << (guestForMove ? "владеет" : "пуст") << "\n";
+
+    auto movedGuest = std::move(guestForMove);
+    std::cout << "guestForMove после move: " << (guestForMove ? "владеет" : "пуст") << "\n";
+    std::cout << "movedGuest: " << (movedGuest ? "владеет" : "пуст") << "\n";
+    movedGuest->printInfo();
+
+    std::cout << "\n=== 4. unique_ptr<[]> Массивы ===\n";
+    auto roomsArray = std::make_unique<Room[]>(2);
     roomsArray[0] = Room(101, 3000.0);
     roomsArray[1] = Room(102, 4500.0);
+    roomsArray[0].printInfo();
 
-    // 2) Массив динамических объектов (массив указателей)
-    Guest** guestsArray = new Guest * [2];
-    guestsArray[0] = new Guest("Сидоров А.", "1111 111111");
-    guestsArray[1] = new Guest("Алексеев Б.", "2222 222222");
+    std::unique_ptr<Guest> guestsArray[2];
+    guestsArray[0] = std::make_unique<Guest>("Сидоров А.", "1111 111111");
+    guestsArray[1] = std::make_unique<Guest>("Алексеев Б.", "2222 222222");
+    guestsArray[0]->printInfo();
 
-    std::cout << "\n=== 4. Проверка правила предметной области ===\n";
+    std::cout << "\n=== 5. Проверка правила предметной области ===\n";
     Room testRoom(202, 5000.0);
     std::cout << "--- Корректное действие: ---\n";
-    testRoom.checkIn(&staticGuest); // Успешное заселение
-    std::cout << "--- Попытка нарушить правило (номер уже занят): ---\n";
-    testRoom.checkIn(dynGuest);     // Ожидается отказ и сообщение об ошибке
+    testRoom.checkIn(std::make_shared<Guest>("Тестовый", "0000"));
+    std::cout << "--- Попытка нарушить правило: ---\n";
+    testRoom.checkIn(std::make_shared<Guest>("Второй", "1111"));
 
-    std::cout << "\n=== 5. Композиция и Агрегация (Время жизни) ===\n";
-    Guest* aggregatedGuest = new Guest("Гость-Агрегатор", "3333 333333");
+
+    std::cout << "\n=== 6. shared_ptr: счётчик владельцев ===\n";
+    auto aggregatedGuest = std::make_shared<Guest>("Гость-Агрегатор", "3333 333333");
+    std::cout << "Счётчик: " << aggregatedGuest.use_count() << "\n";//кол-во ссылок
+
     {
-        std::cout << ">>> Вход во вложенный блок...\n";
+        std::shared_ptr<Guest> secondOwner = aggregatedGuest;
+        std::cout << "После копирования счётчик: " << aggregatedGuest.use_count() << "\n";
 
-        // Hotel - целое (композиция) создается статически
+        std::cout << "______Вход во вложенный блок____\n";
+
         Hotel myHotel("Мини-Отель 'Ромашка'");
-
-        // Room - часть (композиция) добавляется по значению 
-        // копируется в динамический массив внутри Hotel
         myHotel.addRoom(Room(301, 6000.0));
         myHotel.addRoom(Room(302, 7000.0));
 
-        // Агрегация: заселяем гостя, который был создан снаружи блока
-        // Номер хранит указатель на него, но не владеет им
         myHotel.checkInGuestToRoom(aggregatedGuest, 301);
 
-        std::cout << "--- Состояние отеля внутри блока ---\n";
+        std::cout << "--- Состояние отеля ---\n";
         myHotel.printAvailableRooms();
 
-        std::cout << ">>> Выходим из блока. Ожидайте деструкторов Hotel и Room...\n";
+        std::cout << "______Выход из блока____\n";
     }
 
-    std::cout << "\n=== 6. Проверка, что агрегированный объект выжил ===\n";
-    // Гость жив, Отель и Номер уничтожены
+
+    std::cout << "\n=== 7. shared_ptr выжил ===\n";
+    std::cout << "Счётчик: " << aggregatedGuest.use_count() << "\n";
     aggregatedGuest->printInfo();
 
-    std::cout << "\n=== 7. Освобождение динамической памяти ===\n";
-    delete dynGuest;
 
-    delete[] roomsArray;
+    std::cout << "\n=== 8. Освобождение shared_ptr ===\n";
+    aggregatedGuest.reset();
+    std::cout << "Объект уничтожен.\n";
 
-    for (int i = 0; i < 2; ++i) {
-        delete guestsArray[i];
-    }
-    delete[] guestsArray;
-
-    delete aggregatedGuest;
-
-    std::cout << "\n=== Конец программы. Статические объекты уничтожаются автоматически ===\n";
+    std::cout << "\n=== Конец ===\n";
     return 0;
 }
