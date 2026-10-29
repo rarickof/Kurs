@@ -1,0 +1,16 @@
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.GeneratedMSBuildEditorConfig.editorconfig
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.AssemblyInfoInputs.cache
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.AssemblyInfo.cs
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.csproj.CoreCompileInputs.cache
+D:\Практики\Политех\2ПрогрООП\Лр3\bin\Debug\net10.0\Лр3.exe
+D:\Практики\Политех\2ПрогрООП\Лр3\bin\Debug\net10.0\Лр3.deps.json
+D:\Практики\Политех\2ПрогрООП\Лр3\bin\Debug\net10.0\Лр3.runtimeconfig.json
+D:\Практики\Политех\2ПрогрООП\Лр3\bin\Debug\net10.0\Лр3.dll
+D:\Практики\Политех\2ПрогрООП\Лр3\bin\Debug\net10.0\Лр3.pdb
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.dll
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\refint\Лр3.dll
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.pdb
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.genruntimeconfig.cache
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\ref\Лр3.dll
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.csproj.Up2Date
+D:\Практики\Политех\2ПрогрООП\Лр3\obj\Debug\net10.0\Лр3.sourcelink.json
