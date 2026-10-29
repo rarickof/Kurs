@@ -14,8 +14,9 @@ namespace Лр3
         public Hotel(string name)
         {
             _rooms = new Room[INITIAL_CAPACITY];
-            _roomsCount = 0;
             _roomsCapacity = INITIAL_CAPACITY;
+            _roomsCount = 0;
+            
 
             if (string.IsNullOrEmpty(name))
             {

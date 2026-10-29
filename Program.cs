@@ -2,7 +2,7 @@
 
 namespace Лр3
 {
-    // Вспомогательный класс для демонстрации IDisposable (аналог деструктора из C++)
+    // Вспомогательный класс для демонстрации IDisposable
     public sealed class IssueLog : IDisposable
     {
         private readonly string _roomNumber;
@@ -76,9 +76,6 @@ namespace Лр3
 
             Console.WriteLine($"Объект жив после сборки мусора? {weakRef.TryGetTarget(out _)}");
         }
-
-        // Метод создан специально, чтобы локальная переменная temp вышла из области видимости
-        // и объект стал доступен для GC (в отладочной сборке локальные переменные могут жить до конца метода)
         static void CreateTemporaryGuest(out WeakReference<Guest> weakRef)
         {
             Guest temp = new Guest("Списанный Гость", "0000");
