@@ -17,15 +17,20 @@ public:
     // Конструкторы
     Guest();
     Guest(const std::string& name, const std::string& passport);
-    
+
     // Правило трёх
     Guest(const Guest& other);
+
+    // Оператор присваивания a = b
+    // Если не писать поверхностный оператор поэлементно скопирует все поля. 
     Guest& operator=(const Guest& other);
 
     // Содержательные методы
     void printInfo() const;
     void requestService(const std::string& serviceName);
     void cancelService(const std::string& serviceName);
+
+    Guest& withService(const std::string& service);
 
     // Геттеры Guest
     [[nodiscard]] std::string getName() const;
