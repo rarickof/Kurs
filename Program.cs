@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Лр3
+namespace KursVar_2
 {
     // Явный вызов "деструктора"
     public sealed class IssueLog : IDisposable
@@ -25,60 +25,51 @@ namespace Лр3
 
     class Program
     {
+
         static void Main()
         {
-            Console.WriteLine("=== 1. Ссылки и Копии (Классы, Структуры) ===");
-            // Классы (ссылочный тип)
-            Guest guest1 = new Guest("Иван Иванов", "1234 567890");
-            Guest guest2 = guest1;
-            guest2.RequestService("Завтрак");
-            Console.WriteLine($"guest1: {guest1}");
-            Console.WriteLine($"Ссылки равны? {ReferenceEquals(guest1, guest2)}\n");//проверка куда ссылаются 2 переменные
+            Console.WriteLine("\n=== 1. Массив со стоимостью номеров ===\n");
 
-            // Структуры (тип-значение)
-            Money price1 = new Money { Amount = 5000 };
-            Money price2 = price1; // Копия значения
-            price2.Amount = 7000;
-            Console.WriteLine($"price1: {price1.Amount}, price2: {price2.Amount} \n");
+            BaseRoom[] rooms = new BaseRoom[3];
+
+            rooms[0] = new EconomyRoom(101, 2000);
+            rooms[1] = new StandartRoom(201, 5000);
+            rooms[2] = new LuxuryRoom(301, 10000);
 
 
-            Console.WriteLine("=== 2. Композиция и Агрегация ===");
-            Hotel myHotel = new Hotel("Мини-Отель 'Ромашка'");
-            myHotel.AddRoom(new Room(101, 3000.0));
-            myHotel.AddRoom(new Room(102, 4500.0));
+            Console.WriteLine("\n=== 2. Виртуальные методы ===\n");
 
-            Guest aggregatedGuest = new Guest("Петр Петров", "9876 543210");
-            myHotel.CheckInGuestToRoom(aggregatedGuest, 101); // Агрегация: гость создан снаружи
-            myHotel.PrintAvailableRooms();
+            for (int i = 0; i < 3; i++)
+            {
+                Console.WriteLine($"{rooms[i].CalculateCost(2)}");
+            }
 
+            Console.WriteLine("\n=== 3. Переопределение ===\n");
 
-            Console.WriteLine("\n=== 3. Проверка правила предметной области ===");
-            myHotel.CheckInGuestToRoom(new Guest("Сидоров", "1111"), 101); // Отказ: номер занят
+            for (int i = 0; i < 3; i++)
+            {
+                Console.WriteLine($"{rooms[i].GetDescription()}");
+            }
 
+            Console.WriteLine("\n=== 4. Копия ===");
 
-            Console.WriteLine("\n=== 4. Освобождение ресурса (IDisposable + using) ===");
+            Guest original = new Guest("Иван Иванов", "1234 567890");
+            original.RequestService("Завтрак");
+            Console.WriteLine($"\nОригинал: {original}\n");
+            Guest deep = original.DeepCopy();
+            deep.RequestService("Парковка");
+            Console.WriteLine($"\nОригинал после изменения глубокой копии: {original}\n");
+            Console.WriteLine($"Глубокая копия: {deep}");
 
-            using (var log = new IssueLog("101"))
+            Console.WriteLine("\n=== 5. using и IDisposable ===");
+
+            // using гарантирует, что объект, реализующий метод Dispose(),
+            // будет правильно освобождён после завершения блока кода,даже если внутри произошло исключение.
+            using (var log = new IssueLog("401"))
             {
                 log.Write("Гость выехал. Требуется замена белья.");
-            } // автоматически вызывается log.Dispose()
-
-
-            Console.WriteLine("\n=== 5. Работа Сборщика Мусора ===");
-
-            WeakReference<Guest> weakRef;
-            CreateTemporaryGuest(out weakRef);
-            Console.WriteLine($"Объект жив до сборки мусора? {weakRef.TryGetTarget(out _)}");
-
-            GC.Collect(); // Принудительная работа сборщика мусора
-            GC.WaitForPendingFinalizers();
-
-            Console.WriteLine($"Объект жив после сборки мусора? {weakRef.TryGetTarget(out _)}");
-        }
-        static void CreateTemporaryGuest(out WeakReference<Guest> weakRef)
-        {
-            Guest temp = new Guest("Списанный Гость", "0000");
-            weakRef = new WeakReference<Guest>(temp);
+                log.Write("Проверка мини-бара.");
+            } //здесь автоматически вызывается log.Dispose()
         }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Лр3
+namespace KursVar_2
 {
-    class Room
+    public abstract class BaseRoom
     {
-
         private int _number;                    // Номер комнаты
         private double _pricePerNight;          // Стоимость за ночь
-        private string _status;                // "Свободен" | "Занят" | "Требуется уборка"
         private Guest _currentGuest;           // АГРЕГАЦИЯ: указатель на гостя.
-        // Room не создаёт и не удаляет гостя.
+        protected string _status;                // "Свободен" | "Занят" | "Требуется уборка"
+        //Статическое поле создается в единственном экземпляре и разделяется между всеми объектами класса.
+        private static int _roomCounter = 0;// Счётчик созданных номеров.
 
         private bool ValidateRoomData(int number, double pricePerNight)
         {
@@ -26,13 +26,25 @@ namespace Лр3
             return true;
         }
 
+        // Виртуальный метод — наследники могут переопределить через override
+        //позволить производным классам переопределить их реализацию
+        public virtual string GetDescription()
+        {
+            return $"Номер  {_number}, цена: {_pricePerNight}, статус: {_status}";
+        }
+
+        // abstract метод — чисто виртуальный.Наследники обязаны реализовать
+        //реализация неполная и должна быть предоставлена в производных классах. 
+        public abstract double CalculateCost(int nights);
+
         // Конструктор с параметрами
-        public Room(int number, double pricePerNight)
+        public BaseRoom(int number, double pricePerNight)
         {
             _number = number;
             _pricePerNight = pricePerNight;
             _status = "Свободен";
             _currentGuest = null;
+            _roomCounter++;
 
             // Проверка правила предметной области
             if (!ValidateRoomData(number, pricePerNight))
@@ -41,6 +53,17 @@ namespace Лр3
                 _number = 0;
                 _pricePerNight = 0.0;
             }
+        }
+        //Статический метод можно вызвать, не создавая объект этого класса. Он принадлежит классу целиком.
+        public static int GetRoomCounter()
+        {
+            return _roomCounter;
+        }
+
+        // Передача текущего объекта другому объекту через this
+        public void ReportTo(Hotel hotel)
+        {
+            hotel.RegisterRoom(this);
         }
         // 1: Заселение гостя
         public void CheckIn(Guest guest)
@@ -113,23 +136,16 @@ namespace Лр3
 
         // Свойства
         public int Number
-        {
-            get { return _number; }
-        }
+        { get { return _number; } }
 
         public double PricePerNight
-        {
-            get { return _pricePerNight; }
-        }
+        { get { return _pricePerNight; } }
 
         public string Status
-        {
-            get { return _status; }
-        }
+        { get { return _status; } }
 
         public Guest CurrentGuest
-        {
-            get { return _currentGuest; }
-        }
+        { get { return _currentGuest; } }
     }
 }
+
