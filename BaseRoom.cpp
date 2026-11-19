@@ -1,8 +1,8 @@
-﻿#include "Room.hpp"
+﻿#include "BaseRoom.hpp"
 #include <iostream>
 
 // Вспомогательный приватный метод для валидации данных
-bool Room::validateRoomData(int number, double pricePerNight) const {
+bool BaseRoom::validateRoomData(int number, double pricePerNight) const {
     if (number <= 0) {
         std::cout << " !!! Номер комнаты должен быть > 0. Получено: " << number << std::endl;
         return false;
@@ -14,15 +14,8 @@ bool Room::validateRoomData(int number, double pricePerNight) const {
     return true;
 }
 
-// Конструктор по умолчанию
-Room::Room()
-    : m_number(0),
-    m_pricePerNight(0.0),
-    m_status("Свободен"),
-    m_currentGuest() {}
-
 // Конструктор с параметрами
-Room::Room(int number, double pricePerNight)
+BaseRoom::BaseRoom(int number, double pricePerNight)
     : m_number(number),
     m_pricePerNight(pricePerNight),
     m_status("Свободен"),
@@ -34,10 +27,46 @@ Room::Room(int number, double pricePerNight)
         m_number = 0;
         m_pricePerNight = 0.0;
     }
+
+    std::cout << "BaseRoom() создан: номер " << number << "\n";
+    ++m_num_of_rooms;
+}
+
+BaseRoom::BaseRoom(const BaseRoom& other)
+    : m_number{ other.m_number },
+    m_pricePerNight{ other.m_pricePerNight },
+    m_status(other.m_status),
+    m_currentGuest{ other.m_currentGuest }
+
+{
+    ++m_num_of_rooms;
+}
+
+// Оператор присваивания a = b
+// Если не писать поверхностный оператор поэлементно скопирует все поля.
+BaseRoom& BaseRoom::operator=(const BaseRoom& other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+
+    m_number = other.m_number;
+    m_pricePerNight = other.m_pricePerNight;
+    m_status = other.m_status;
+    m_currentGuest = other.m_currentGuest;
+
+    return *this; // возврат самого объекта: a = b = c
+}
+// Виртуальный метод с реализацией, наследник может переопределить
+std::string BaseRoom::getDescription() const {
+    return "Номер " + std::to_string(m_number) +
+        ", цена: " + std::to_string(m_pricePerNight) +
+        ", статус:" + m_status;
 }
 
 // Содержательный метод 1: Заселение гостя
-void Room::checkIn(std::shared_ptr<Guest> guest) {
+void BaseRoom::checkIn(std::shared_ptr<Guest> guest) {
     // 1. проверка входящего параметра
     if (!guest) {
         std::cout << " !!! Попытка заселить несуществующего гостя в номер " << m_number << "." << std::endl;
@@ -47,7 +76,7 @@ void Room::checkIn(std::shared_ptr<Guest> guest) {
     // 2. Проверка, не занят ли номер
     if (!m_currentGuest.expired()) {//проверка на существование
         if (auto lockedGuest = m_currentGuest.lock()) {//жив ли гость (да, возврат shared)
-            std::cout << " !!! Номер " << m_number << " уже занят гостем " << lockedGuest->getName()  << ". Заселение отклонено." << std::endl;
+            std::cout << " !!! Номер " << m_number << " уже занят гостем " << lockedGuest->getName() << ". Заселение отклонено." << std::endl;
         }
         return;
     }
@@ -64,7 +93,7 @@ void Room::checkIn(std::shared_ptr<Guest> guest) {
 }
 
 // Содержательный метод 2: Выселение гостя
-void Room::checkOut() {
+void BaseRoom::checkOut() {
     auto lockedGuest = m_currentGuest.lock();
     // Проверка: в номере должен кто-то жить
     if (!lockedGuest) {
@@ -84,7 +113,7 @@ void Room::checkOut() {
 }
 
 // Содержательный метод 3: Вывод информации
-void Room::printInfo() const {
+void BaseRoom::printInfo() const {
     std::cout << "  Номер: " << m_number
         << " | Цена: " << m_pricePerNight << " руб./ночь"
         << " | Статус: " << m_status;
@@ -94,25 +123,14 @@ void Room::printInfo() const {
     }
     std::cout << std::endl;
 }
-
 // Содержательный метод 4: Проверка доступности
-bool Room::isAvailable() const {
+bool BaseRoom::isAvailable() const {
     return (m_status == "Свободен" && m_currentGuest.expired());
 }
 
+int BaseRoom::setNumber(int number) { return m_number = number; }
 // Геттеры
-int Room::getNumber() const {
-    return m_number;
-}
-
-double Room::getPricePerNight() const {
-    return m_pricePerNight;
-}
-
-std::string Room::getStatus() const {
-    return m_status;
-}
-
-std::weak_ptr<Guest> Room::getCurrentGuest() const {
-    return m_currentGuest;
-}
+int BaseRoom::getNumber() const { return m_number; }
+double BaseRoom::getPricePerNight() const { return m_pricePerNight; }
+std::string BaseRoom::getStatus() const { return m_status; }
+int BaseRoom::getUsedRooms() { return m_num_of_rooms; }

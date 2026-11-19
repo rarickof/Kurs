@@ -23,16 +23,16 @@ Guest::Guest()
     m_passport("0000 000000"),
     m_requestedServices(std::make_unique<std::string[]>(INITIAL_CAPACITY)),
     m_servicesCount(0),
-    m_servicesCapacity(INITIAL_CAPACITY) 
+    m_servicesCapacity(INITIAL_CAPACITY)
 {}
 
 // Конструктор с параметрами
 Guest::Guest(const std::string& name, const std::string& passport)
     : m_name(name),
-      m_passport(passport),
-      m_requestedServices(std::make_unique<std::string[]>(INITIAL_CAPACITY)),
-      m_servicesCount(0),
-      m_servicesCapacity(INITIAL_CAPACITY) {
+    m_passport(passport),
+    m_requestedServices(std::make_unique<std::string[]>(INITIAL_CAPACITY)),
+    m_servicesCount(0),
+    m_servicesCapacity(INITIAL_CAPACITY) {
 
     // Проверка правила предметной области
     if (!validateData(name, passport)) {
@@ -72,7 +72,8 @@ Guest::Guest(const Guest& other)
     }
 }
 
-// Оператор присваивания
+// Оператор присваивания a = b значения справа в левую переменную
+// Если не писать поверхностный оператор поэлементно скопирует все поля. 
 Guest& Guest::operator=(const Guest& other) {
     if (this == &other) {
         return *this;
@@ -166,6 +167,11 @@ void Guest::cancelService(const std::string& serviceName) {
     m_requestedServices[m_servicesCount] = "";
 
     std::cout << " Гость " << m_name << " отменил услугу \"" << serviceName << "\"." << std::endl;
+}
+
+Guest& Guest::withService(const std::string& service) {
+    requestService(service);  // добавление услуги
+    return *this;
 }
 
 // Геттеры
