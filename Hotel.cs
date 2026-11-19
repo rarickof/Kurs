@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Лр3
+namespace KursVar_2
 {
-    class Hotel
+    public class Hotel
     {
         private string _name;
-        private Room[] _rooms;
+        private BaseRoom[] _rooms;
         private int _roomsCount;       // Сколько номеров сейчас в массиве
         private int _roomsCapacity;    // На сколько элементов выделена память
         private const int INITIAL_CAPACITY = 5;
@@ -13,7 +13,7 @@ namespace Лр3
         // Конструктор с параметрами
         public Hotel(string name)
         {
-            _rooms = new Room[INITIAL_CAPACITY];
+            _rooms = new BaseRoom[INITIAL_CAPACITY];
             _roomsCapacity = INITIAL_CAPACITY;
             _roomsCount = 0;
 
@@ -28,11 +28,17 @@ namespace Лр3
             }
         }
 
+        // принимает текущий номер через this
+        public void RegisterRoom(BaseRoom room)
+        {
+            Console.WriteLine($" Отель {_name} зарегистрировал номер {room.Number}");
+        }
+
         // Увеличение ёмкости массива в 2 раза
         private void ResizeArray()
         {
             int newCapacity = _roomsCapacity * 2;
-            Room[] newArray = new Room[newCapacity];
+            BaseRoom[] newArray = new BaseRoom[newCapacity];
 
             // Копируем старые номера в новый массив
             for (int i = 0; i < _roomsCount; ++i)
@@ -60,7 +66,7 @@ namespace Лр3
         }
 
         // 1: Добавление номера
-        public void AddRoom(Room room)
+        public void AddRoom(BaseRoom room)
         {
             // Правило: Номер комнаты должен быть строго больше 0
             if (room.Number <= 0)
@@ -113,7 +119,7 @@ namespace Лр3
         public void CheckInGuestToRoom(Guest guest, int roomNumber)
         {
             //поиск номера
-            Room targetRoom = null;
+            BaseRoom targetRoom = null;
             for (int i = 0; i < _roomsCount; ++i)
             {
                 if (_rooms[i].Number == roomNumber)
@@ -134,7 +140,7 @@ namespace Лр3
         // 4: Выселение гостя
         public void CheckOutFromRoom(int roomNumber)
         {
-            Room targetRoom = null;
+            BaseRoom targetRoom = null;
             for (int i = 0; i < _roomsCount; ++i)
             {
                 if (_rooms[i].Number == roomNumber)

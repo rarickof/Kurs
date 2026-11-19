@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Практики\\Политех\\2ПрогрООП\\Лр3\\Лр3.csproj",
-      "projectName": "Лр3",
-      "projectPath": "D:\\Практики\\Политех\\2ПрогрООП\\Лр3\\Лр3.csproj",
+      "projectUniqueName": "D:\\Практики\\Политех\\2ПрогрООП\\KursVar№2\\KursVar№2.csproj",
+      "projectName": "KursVar№2",
+      "projectPath": "D:\\Практики\\Политех\\2ПрогрООП\\KursVar№2\\KursVar№2.csproj",
       "packagesPath": "C:\\Users\\kiril\\.nuget\\packages\\",
-      "outputPath": "D:\\Практики\\Политех\\2ПрогрООП\\Лр3\\obj\\",
+      "outputPath": "D:\\Практики\\Политех\\2ПрогрООП\\KursVar№2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

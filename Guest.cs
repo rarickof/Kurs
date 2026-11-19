@@ -1,17 +1,17 @@
 ﻿using System;
 
-namespace Лр3
+namespace KursVar_2
 {
     public class Guest
     {
         private string _name;
         private string _passport;
-
         private string[] _requestedServices;
         private int _servicesCount;       // Сколько услуг сейчас в массиве
         private int _servicesCapacity;    // На сколько элементов выделена память
 
         private const int INITIAL_CAPACITY = 5; // Начальная ёмкость динамического массива
+
 
         private bool ValidateData(string name, string passport)
         {
@@ -46,6 +46,21 @@ namespace Лр3
                 _name = name;
                 _passport = passport;
             }
+        }
+        public Guest DeepCopy()
+        {
+            // поверхностная копия всех полей
+            var copy = (Guest)MemberwiseClone();
+
+            // новый пустой массив для копии
+            copy._requestedServices = new string[_servicesCapacity];
+            // копирование из старого массива в новый
+            for (int i = 0; i < _servicesCount; i++)
+            {
+                copy._requestedServices[i] = _requestedServices[i];
+            }
+
+            return copy;
         }
 
         // Увеличение ёмкости массива в 2 раза
